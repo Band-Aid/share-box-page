@@ -1,0 +1,12 @@
+{
+    "ja": {
+        "msgTitle": "コピーしたリンクにページ番号を追加しますか？",
+        "yesBtn": "はい",
+        "noBtn": "いいえ"
+    },
+    "en": {
+        "msgTitle": "Do you want to add page number to the copied link?",
+        "yesBtn": "Yes",
+        "noBtn": "No"
+    }
+}
