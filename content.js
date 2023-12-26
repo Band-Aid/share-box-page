@@ -31,7 +31,7 @@ document.addEventListener('copy', async function (e) {
 
     const retryGetPageNumber = setInterval(() => {
         const pageNumber = document.querySelectorAll('.bp-thumbnail-is-selected .bp-thumbnail-page-number')[0]?.innerText;
-        const timeCocde = document.getElementsByClassName('bp-media-controls-timecode')[0].innerHTML;
+        const timeCocde = document.getElementsByClassName('bp-media-controls-timecode')[0]?.innerHTML;
         if (pageNumber) {
             clearInterval(retryGetPageNumber);
             createToast(pageNumber, "page");
