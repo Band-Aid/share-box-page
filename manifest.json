@@ -1,17 +1,34 @@
 {
-    "manifest_version": 3,
-    "name": "share page number",
-    "version": "0.0.1",
-    "description": "Copies the currently viewing page number and adds it to the shared link",
-    "permissions": ["clipboardRead", "clipboardWrite", "activeTab"],
-    "content_scripts": [
-      {
-        "matches": ["https://*.box.com/*"],
-        "js": ["content.js"]
-      }
-    ],
-    "host_permissions": [
-      "https://*.box.com/*"
-    ]
-  }
-  
+  "manifest_version": 3,
+  "name": "share page number",
+  "version": "0.0.3",
+  "description": "Copies the currently viewing page number and adds it to the shared link",
+  "permissions": [
+    "clipboardRead",
+    "clipboardWrite",
+    "activeTab"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.box.com/*"
+      ],
+      "js": [
+        "content.js"
+      ]
+    }
+  ],
+  "host_permissions": [
+    "https://*.box.com/*"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "lib/l18n/l18n.json"
+      ],
+      "matches": [
+        "https://*.box.com/*"
+      ]
+    }
+  ]
+}
