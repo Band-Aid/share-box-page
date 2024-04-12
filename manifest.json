@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "share page number",
-  "version": "0.0.3",
-  "description": "Copies the currently viewing page number and adds it to the shared link",
+  "version": "0.1.0",
+  "description": "Copies the currently viewing page number or video time code and adds it to the shared link",
   "permissions": [
     "clipboardRead",
     "clipboardWrite",
