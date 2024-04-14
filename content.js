@@ -73,7 +73,8 @@ async function createToast(value, type) {
     }
 
     document.getElementById('yesButton').addEventListener('click', function () {
-        // Handle the action
+        // Get selected text: page number or timecode
+        //Todo: Need to figure out better way of getting shared link
         let linkValue;
         const text = window.getSelection()?.toString();
         if (type === 'page') {
@@ -95,7 +96,7 @@ async function createToast(value, type) {
         toastDiv.remove();
     });
     document.getElementById('noButton').addEventListener('click', function () {
-        console.log('do nothing')
+        console.log('Shared link not copied')
         clearInterval(id);
         toastDiv.remove();       
     });
@@ -107,7 +108,7 @@ function retryGetPageNumber(retryInterval, maxRetryTime, createToast) {
     const intervalId = setInterval(() => {
         const pageNumber = document.querySelectorAll('.bp-thumbnail-is-selected .bp-thumbnail-page-number')[0]?.innerText;
         const timeCocde = document.getElementsByClassName('bp-media-controls-timecode')[0]?.innerHTML;
-
+        
         if (pageNumber) {
             clearInterval(intervalId);
             createToast(pageNumber, "page");
@@ -129,8 +130,7 @@ function retryGetPageNumber(retryInterval, maxRetryTime, createToast) {
 
 function observerCallback(mutations) {    
     let copylink = document.querySelectorAll('button[data-resin-target="link|copy"]');
-    console.log('copylink', copylink);
-    if (copylink.length > 0) {
+        if (copylink.length > 0) {
         copylink[0].addEventListener('click', async function (e) {       
             const retryInterval = 100; // 100 ms
             const maxRetryTime = 5000; // 5 seconds
