@@ -19,5 +19,5 @@ steps:
     rootFolderOrFile: '$(Build.BinariesDirectory)'
     includeRootFolder: true
     archiveType: 'zip'
-    archiveFile: '$(Build.ArtifactStagingDirectory)/dist/$(Build.BuildId).zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/dist/boxshare.zip'
     replaceExistingArchive: true
