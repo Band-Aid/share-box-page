@@ -1,5 +1,3 @@
-//global variables :todo: remove
-let observer = new MutationObserver(observerCallback);
 // Fetch language data
 async function fetchLanguageData(language, type) {
     const response = await fetch(chrome.runtime.getURL(`lib/l18n/l18n.json`));
@@ -24,13 +22,13 @@ async function fetchLanguageData(language, type) {
 
 // Create toast
 async function createToast(value, type) {
-    observer.disconnect();
+
     const browserLanguage = navigator.language || navigator.userLanguage;
     const { message, str_yesButton, str_noButton } = browserLanguage.startsWith('ja') ?
         await fetchLanguageData('ja', type) :
         await fetchLanguageData('en', type);
 
-   // Create 'toast' div element
+    // Create 'toast' div element
     const toastDiv = document.createElement('div');
     toastDiv.setAttribute('id', 'clipboardMonitorToast');
     toastDiv.style.position = 'fixed';
@@ -66,6 +64,7 @@ async function createToast(value, type) {
         if (width <= 0) {
             clearInterval(id);
             toastDiv.remove();
+            stateObservers()
         } else {
             width -= decrement;
             progressBar.style.width = width + '%';
@@ -94,11 +93,13 @@ async function createToast(value, type) {
         // Remove the toast and progress bar after the button click
         clearInterval(id);
         toastDiv.remove();
+        stateObservers();
     });
     document.getElementById('noButton').addEventListener('click', function () {
         console.log('Shared link not copied')
         clearInterval(id);
-        toastDiv.remove();       
+        toastDiv.remove();
+        stateObservers()
     });
 }
 
@@ -108,7 +109,6 @@ function retryGetPageNumber(retryInterval, maxRetryTime, createToast) {
     const intervalId = setInterval(() => {
         const pageNumber = document.querySelectorAll('.bp-thumbnail-is-selected .bp-thumbnail-page-number')[0]?.innerText;
         const timeCocde = document.getElementsByClassName('bp-media-controls-timecode')[0]?.innerHTML;
-        
         if (pageNumber) {
             clearInterval(intervalId);
             createToast(pageNumber, "page");
@@ -128,19 +128,21 @@ function retryGetPageNumber(retryInterval, maxRetryTime, createToast) {
     return intervalId;
 }
 
-function observerCallback(mutations) {    
+function observerCallback(mutations) {
     let copylink = document.querySelectorAll('button[data-resin-target="link|copy"]');
-        if (copylink.length > 0) {
-        copylink[0].addEventListener('click', async function (e) {       
+   
+    if (copylink.length > 0) {
+        observer.disconnect();
+        copylink[0].addEventListener('click', async function (e) {
             const retryInterval = 100; // 100 ms
-            const maxRetryTime = 5000; // 5 seconds
-            retryGetPageNumber(retryInterval, maxRetryTime, createToast);
+            const maxRetryTime = 5000; // 5 seconds            //todo: make use of retryState to clear the interval and manage observer events
+            let retryState = retryGetPageNumber(retryInterval, maxRetryTime, createToast);
         });
     }
-   observer.disconnect();
 }
 
-function startObserver() {
-    observer.observe(document, { childList: true, subtree: true });
+let observer = new MutationObserver(observerCallback);
+function stateObservers() {
+    observer.observe(document, { childList: true, subtree: true })
 }
-startObserver();
+stateObservers()
