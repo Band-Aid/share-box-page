@@ -141,8 +141,9 @@ function observerCallback(mutations) {
     }
 }
 
-let observer = new MutationObserver(observerCallback);
+
 function stateObservers() {
-    observer.observe(document, { childList: true, subtree: true })
+    const observer = new MutationObserver(observerCallback);
+    observer.observe(document, { childList: true, subtree: true });
 }
-stateObservers()
+stateObservers();
