@@ -4,8 +4,7 @@
   "version": "0.1.6",
   "description": "Copies the currently viewing page number or video time code and adds it to the shared link",
   "permissions": [
-    "clipboardRead",
-    "clipboardWrite"
+    "clipboardRead"
   ],
   "content_scripts": [
     {
