@@ -128,22 +128,19 @@ function retryGetPageNumber(retryInterval, maxRetryTime, createToast) {
     return intervalId;
 }
 
-function observerCallback(mutations) {
-    let copylink = document.querySelectorAll('button[data-resin-target="link|copy"]');
-   
-    if (copylink.length > 0) {
-        observer.disconnect();
-        copylink[0].addEventListener('click', async function (e) {
-            const retryInterval = 100; // 100 ms
-            const maxRetryTime = 5000; // 5 seconds            //todo: make use of retryState to clear the interval and manage observer events
-            let retryState = retryGetPageNumber(retryInterval, maxRetryTime, createToast);
-        });
-    }
-}
-
 
 function stateObservers() {
-    const observer = new MutationObserver(observerCallback);
+    const observer = new MutationObserver(function observerCallback(mutations) {
+        let copylink = document.querySelectorAll('button[data-resin-target="link|copy"]');
+        if (copylink.length > 0) {
+            observer.disconnect();
+            copylink[0].addEventListener('click', async function (e) {
+                const retryInterval = 100; // 100 ms
+                const maxRetryTime = 5000; // 5 seconds
+                let retryState = retryGetPageNumber(retryInterval, maxRetryTime, createToast);
+            });
+        }
+    });
     observer.observe(document, { childList: true, subtree: true });
 }
 stateObservers();
