@@ -129,16 +129,29 @@ function retryGetPageNumber(retryInterval, maxRetryTime, createToast) {
 }
 
 
+// Track if we've already added the event listener to avoid duplicates
+let copyButtonClickHandler = null;
+
 function stateObservers() {
     const observer = new MutationObserver(function observerCallback(mutations) {
         let copylink = document.querySelectorAll('button[data-resin-target="link|copy"]');
         if (copylink.length > 0) {
             observer.disconnect();
-            copylink[0].addEventListener('click', async function (e) {
+            
+            // Remove previous event listener if it exists
+            if (copyButtonClickHandler) {
+                copylink[0].removeEventListener('click', copyButtonClickHandler);
+            }
+            
+            // Create new event listener
+            copyButtonClickHandler = async function (e) {
                 const retryInterval = 100; // 100 ms
                 const maxRetryTime = 5000; // 5 seconds
                 let retryState = retryGetPageNumber(retryInterval, maxRetryTime, createToast);
-            });
+            };
+            
+            // Add the event listener
+            copylink[0].addEventListener('click', copyButtonClickHandler);
         }
     });
     observer.observe(document, { childList: true, subtree: true });
