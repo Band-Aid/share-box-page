@@ -139,8 +139,10 @@ function stateObservers() {
         if (copylink.length > 0) {
             observer.disconnect();
             
-            // Remove previous event listener if it exists and from the correct element
-            if (copyButtonClickHandler && previousCopyButton) {
+            const copyButton = copylink[0];
+            
+            // Remove previous event listener if it exists and element is still in DOM
+            if (copyButtonClickHandler && previousCopyButton && previousCopyButton.isConnected) {
                 previousCopyButton.removeEventListener('click', copyButtonClickHandler);
             }
             
@@ -152,8 +154,8 @@ function stateObservers() {
             };
             
             // Add the event listener and track the button element
-            copylink[0].addEventListener('click', copyButtonClickHandler);
-            previousCopyButton = copylink[0];
+            copyButton.addEventListener('click', copyButtonClickHandler);
+            previousCopyButton = copyButton;
         }
     });
     observer.observe(document, { childList: true, subtree: true });
