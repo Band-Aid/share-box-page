@@ -129,8 +129,9 @@ function retryGetPageNumber(retryInterval, maxRetryTime, createToast) {
 }
 
 
-// Track if we've already added the event listener to avoid duplicates
+// Track the event listener and button element to properly manage listener lifecycle
 let copyButtonClickHandler = null;
+let previousCopyButton = null;
 
 function stateObservers() {
     const observer = new MutationObserver(function observerCallback(mutations) {
@@ -138,9 +139,9 @@ function stateObservers() {
         if (copylink.length > 0) {
             observer.disconnect();
             
-            // Remove previous event listener if it exists
-            if (copyButtonClickHandler) {
-                copylink[0].removeEventListener('click', copyButtonClickHandler);
+            // Remove previous event listener if it exists and from the correct element
+            if (copyButtonClickHandler && previousCopyButton) {
+                previousCopyButton.removeEventListener('click', copyButtonClickHandler);
             }
             
             // Create new event listener
@@ -150,8 +151,9 @@ function stateObservers() {
                 let retryState = retryGetPageNumber(retryInterval, maxRetryTime, createToast);
             };
             
-            // Add the event listener
+            // Add the event listener and track the button element
             copylink[0].addEventListener('click', copyButtonClickHandler);
+            previousCopyButton = copylink[0];
         }
     });
     observer.observe(document, { childList: true, subtree: true });
