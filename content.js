@@ -108,39 +108,66 @@ function retryGetPageNumber(retryInterval, maxRetryTime, createToast) {
     let retryTime = 0;
     const intervalId = setInterval(() => {
         const pageNumber = document.querySelectorAll('.bp-thumbnail-is-selected .bp-thumbnail-page-number')[0]?.innerText;
-        const timeCocde = document.getElementsByClassName('bp-media-controls-timecode')[0]?.innerHTML;
+        const timeCode = document.getElementsByClassName('bp-media-controls-timecode')[0]?.innerHTML;
+
         if (pageNumber) {
             clearInterval(intervalId);
-            createToast(pageNumber, "page");
+            createToast(pageNumber, 'page');
+            return;
         }
-        if (timeCocde) {
-            console.log('timecode', timeCocde);
+
+        if (timeCode) {
+            console.log('timecode', timeCode);
             clearInterval(intervalId);
-            createToast(timeCocde, "movie");
-        } else {
-            retryTime += retryInterval;
-            if (retryTime >= maxRetryTime) {
-                clearInterval(intervalId);
-                console.log('Failed to get page number.');
-            }
+            createToast(timeCode, 'movie');
+            return;
+        }
+
+        retryTime += retryInterval;
+        if (retryTime >= maxRetryTime) {
+            clearInterval(intervalId);
+            console.log('Failed to get page number.');
         }
     }, retryInterval);
     return intervalId;
 }
 
 
+let isCopyButtonClickListenerInstalled = false;
+let activeRetryIntervalId = null;
+
 function stateObservers() {
-    const observer = new MutationObserver(function observerCallback(mutations) {
-        let copylink = document.querySelectorAll('button[data-resin-target="link|copy"]');
-        if (copylink.length > 0) {
-            observer.disconnect();
-            copylink[0].addEventListener('click', async function (e) {
-                const retryInterval = 100; // 100 ms
-                const maxRetryTime = 5000; // 5 seconds
-                let retryState = retryGetPageNumber(retryInterval, maxRetryTime, createToast);
-            });
-        }
-    });
-    observer.observe(document, { childList: true, subtree: true });
+    if (isCopyButtonClickListenerInstalled) {
+        return;
+    }
+
+    // Event delegation: keeps working even if the button is re-rendered.
+    document.addEventListener(
+        'click',
+        function (e) {
+            const target = e.target;
+            if (!(target instanceof Element)) {
+                return;
+            }
+
+            const copyButton = target.closest('button[data-resin-target="link|copy"]');
+            if (!copyButton) {
+                return;
+            }
+
+            const retryInterval = 100; // 100 ms
+            const maxRetryTime = 5000; // 5 seconds
+
+            if (activeRetryIntervalId) {
+                clearInterval(activeRetryIntervalId);
+                activeRetryIntervalId = null;
+            }
+
+            activeRetryIntervalId = retryGetPageNumber(retryInterval, maxRetryTime, createToast);
+        },
+        true
+    );
+
+    isCopyButtonClickListenerInstalled = true;
 }
 stateObservers();
