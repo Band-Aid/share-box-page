@@ -40,3 +40,13 @@ UI上からもページ番号指定できるようになるよと言われて何
 いきおいで作ったのであまりきれいな作りじゃないけど、バグや機能改善などあればこちらにご連絡ください。
 
 https://github.com/Band-Aid/share-box-page/tree/main
+
+## Build
+
+Chrome Web Store upload zip:
+
+```bash
+bash scripts/build-extension.sh
+```
+
+The zip is created at `dist/share-box-page.zip` and includes only the extension runtime files.

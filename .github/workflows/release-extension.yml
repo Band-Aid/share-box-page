@@ -12,15 +12,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Zip extension files
-        run: |
-          mkdir -p dist
-          zip -r dist/share-box-page.zip content.js manifest.json lib/
+      - name: Build extension zip
+        run: bash scripts/build-extension.sh
 
       - name: Create GitHub Release
         id: create_release

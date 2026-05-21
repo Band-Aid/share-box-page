@@ -20,6 +20,32 @@ async function fetchLanguageData(language, type) {
     return { message, str_yesButton, str_noButton };
 }
 
+const COPY_SHARED_LINK_BUTTON_SELECTOR = '[data-testid="modal-content-container"] [data-target-id="Button-CopySharedLink"]';
+const LEGACY_COPY_SHARED_LINK_BUTTON_SELECTOR = 'button[data-resin-target="link|copy"]';
+const SELECTED_PAGE_THUMBNAIL_SELECTOR = '.bp-thumbnail-is-selected[data-bp-page-num]';
+const VIDEO_TIMESTAMP_SELECTOR = '.bp-DurationLabels-label';
+
+function getSelectedPageNumber() {
+    return document.querySelector(SELECTED_PAGE_THUMBNAIL_SELECTOR)?.getAttribute('data-bp-page-num')?.trim();
+}
+
+function getVideoTimeCode() {
+    return document.querySelector(VIDEO_TIMESTAMP_SELECTOR)?.innerText?.trim();
+}
+
+async function getCopiedSharedLink() {
+    try {
+        const clipboardText = await navigator.clipboard?.readText?.();
+        if (clipboardText) {
+            return clipboardText.trim();
+        }
+    } catch (error) {
+        console.warn('Failed to read copied shared link from clipboard.', error);
+    }
+
+    return window.getSelection()?.toString()?.trim() || '';
+}
+
 // Create toast
 async function createToast(value, type) {
 
@@ -39,6 +65,7 @@ async function createToast(value, type) {
     toastDiv.style.padding = '15px';
     toastDiv.style.borderRadius = '5px';
     toastDiv.style.zIndex = '9999';
+    toastDiv.style.pointerEvents = 'auto';
 
     // Create a 'progress' div element
     const progressBar = document.createElement('div');
@@ -71,11 +98,15 @@ async function createToast(value, type) {
         }
     }
 
-    document.getElementById('yesButton').addEventListener('click', function () {
+    document.getElementById('yesButton').addEventListener('click', async function () {
         // Get selected text: page number or timecode
-        //Todo: Need to figure out better way of getting shared link
         let linkValue;
-        const text = window.getSelection()?.toString();
+        const text = await getCopiedSharedLink();
+        if (!text) {
+            console.log('Shared link not found.');
+            return;
+        }
+
         if (type === 'page') {
             linkValue = text + '#p=' + value;
             console.log('Appending page number to copied link: ', text);
@@ -89,7 +120,13 @@ async function createToast(value, type) {
         }
 
         //copy string to clipboard
-        navigator.clipboard.writeText(linkValue);
+        try {
+            await navigator.clipboard.writeText(linkValue);
+        } catch (error) {
+            console.warn('Failed to copy shared link with page number or time code.', error);
+            return;
+        }
+
         // Remove the toast and progress bar after the button click
         clearInterval(id);
         toastDiv.remove();
@@ -107,8 +144,8 @@ function retryGetPageNumber(retryInterval, maxRetryTime, createToast) {
 
     let retryTime = 0;
     const intervalId = setInterval(() => {
-        const pageNumber = document.querySelectorAll('.bp-thumbnail-is-selected .bp-thumbnail-page-number')[0]?.innerText;
-        const timeCode = document.getElementsByClassName('bp-media-controls-timecode')[0]?.innerHTML;
+        const pageNumber = getSelectedPageNumber();
+        const timeCode = getVideoTimeCode();
 
         if (pageNumber) {
             clearInterval(intervalId);
@@ -126,7 +163,7 @@ function retryGetPageNumber(retryInterval, maxRetryTime, createToast) {
         retryTime += retryInterval;
         if (retryTime >= maxRetryTime) {
             clearInterval(intervalId);
-            console.log('Failed to get page number.');
+            console.log('Failed to get page number or time code.');
         }
     }, retryInterval);
     return intervalId;
@@ -150,7 +187,8 @@ function stateObservers() {
                 return;
             }
 
-            const copyButton = target.closest('button[data-resin-target="link|copy"]');
+            const copyButton = target.closest(COPY_SHARED_LINK_BUTTON_SELECTOR)
+                || target.closest(LEGACY_COPY_SHARED_LINK_BUTTON_SELECTOR);
             if (!copyButton) {
                 return;
             }
